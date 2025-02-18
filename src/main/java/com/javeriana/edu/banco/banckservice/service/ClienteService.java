@@ -20,15 +20,21 @@ public class ClienteService {
         return repository.findAll();
     }
 
-    public Cliente crearCliente(Cliente cliente) {
-        return repository.save(cliente);
-    }
-
     public Optional<Cliente> buscarClientePorId(Long id) {
         return repository.findById(id);
+    }
+
+    public Cliente actualizarCliente(Long id, Cliente clienteActualizado) {
+        return repository.findById(id).map(cliente -> {
+            cliente.setNombres(clienteActualizado.getNombres());
+            cliente.setApellidos(clienteActualizado.getApellidos());
+            cliente.setNumeroTelefono(clienteActualizado.getNumeroTelefono());
+            return repository.save(cliente);
+        }).orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
     }
 
     public void eliminarCliente(Long id) {
         repository.deleteById(id);
     }
 }
+
