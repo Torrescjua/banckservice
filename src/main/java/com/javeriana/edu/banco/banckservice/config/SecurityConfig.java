@@ -38,10 +38,12 @@ public class SecurityConfig {
               // 1) endpoints públicos de autenticación
               .requestMatchers("/api/auth/**").permitAll()
 
-              // 2) solo desde la IP autorizada podrá llamar a las transacciones
-              .requestMatchers("/api/admin/transacciones/**")
+              // 2) solo desde la IP autorizada podrá llamar a la ruta de Retail
+              .requestMatchers("/api/retail/compras")
                 .access(new WebExpressionAuthorizationManager(
                     "hasIpAddress('" + RETAIL_APP_IP + "')"
+                    + "or hasIpAddress('127.0.0.1') "
+                    + "or hasIpAddress('::1')"
                 ))
 
               // 3) el resto requieren autenticación JWT

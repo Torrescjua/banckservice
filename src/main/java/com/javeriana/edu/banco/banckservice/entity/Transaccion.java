@@ -14,21 +14,20 @@ import java.util.UUID;
 @AllArgsConstructor
 @Table(name = "Transaccion")
 public class Transaccion {
-    @Id
-    @GeneratedValue
+    @Id @GeneratedValue
     private UUID id;
 
-    @ManyToOne
-    @JoinColumn(name = "compra_id")
+    @ManyToOne @JoinColumn(name = "compra_id")
     private Compra compra;
 
     @Column(name = "cliente_cedula")
     private Integer clienteCedula;
 
-    @ManyToOne
-    @JoinColumn(name = "cuenta_id")
+    @ManyToOne @JoinColumn(name = "cuenta_id")
     private CuentaBanco cuenta;
 
     private double monto;
     private Instant fecha;
+
+    private boolean aprobada;
 }

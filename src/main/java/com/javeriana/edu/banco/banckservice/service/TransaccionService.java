@@ -1,64 +1,75 @@
 package com.javeriana.edu.banco.banckservice.service;
 
+import com.javeriana.edu.banco.banckservice.entity.Compra;
 import com.javeriana.edu.banco.banckservice.entity.CuentaBanco;
 import com.javeriana.edu.banco.banckservice.entity.Transaccion;
+import com.javeriana.edu.banco.banckservice.model.PurchaseRequest;
+import com.javeriana.edu.banco.banckservice.model.PurchaseResponse;
+import com.javeriana.edu.banco.banckservice.repository.CompraRepository;
 import com.javeriana.edu.banco.banckservice.repository.CuentaBancoRepository;
 import com.javeriana.edu.banco.banckservice.repository.TransaccionRepository;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.UUID;
 
 @Service
 public class TransaccionService {
 
-    private final TransaccionRepository transRepo;
     private final CuentaBancoRepository cuentaRepo;
+    private final TransaccionRepository transRepo;
+    private final CompraRepository compraRepo;
 
-    public TransaccionService(TransaccionRepository transRepo,
-                              CuentaBancoRepository cuentaRepo) {
-        this.transRepo = transRepo;
+    public TransaccionService(CuentaBancoRepository cuentaRepo,
+                              TransaccionRepository transRepo,
+                              CompraRepository compraRepo) {
         this.cuentaRepo = cuentaRepo;
-    }
-
-    public List<Transaccion> listarTodas() {
-        return transRepo.findAll();
-    }
-
-    public List<Transaccion> porCliente(Integer cedula) {
-        return transRepo.findByClienteCedula(cedula);
+        this.transRepo = transRepo;
+        this.compraRepo = compraRepo;
     }
 
     @Transactional
-    public Transaccion crear(Transaccion t) {
-        // 1) Buscar la cuenta en BD
-        UUID cuentaId = t.getCuenta().getId();
-        CuentaBanco cuenta = cuentaRepo.findById(cuentaId)
-            .orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "Cuenta no encontrada: " + cuentaId));
+    public PurchaseResponse procesarCompra(PurchaseRequest req) {
+        // 1. Verificar cuenta
+        var optCuenta = cuentaRepo.findByCedula(req.getClienteCedula());
+        if (optCuenta.isEmpty()) {
+            // registrar intento fallido sin cuenta
+            Transaccion intento = new Transaccion();
+            intento.setClienteCedula(req.getClienteCedula());
+            intento.setMonto(req.getMonto());
+            intento.setFecha(Instant.now());
+            intento.setAprobada(false);
+            transRepo.save(intento);
 
-        // 2) Validar saldo
-        if (cuenta.getSaldo() < t.getMonto()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "Saldo insuficiente en la cuenta " + cuentaId);
+            return new PurchaseResponse(false, "Cuenta no encontrada", 0.0);
         }
 
-        // 3) Descontar el monto y guardar la cuenta
-        cuenta.setSaldo(cuenta.getSaldo() - t.getMonto());
-        cuentaRepo.save(cuenta);
+        CuentaBanco cuenta = optCuenta.get();
 
-        // 4) Fijar fecha y guardar la transacción
-        t.setFecha(Instant.now());
-        return transRepo.save(t);
-    }
+        // 2. Guardar entidad Compra
+        Compra compra = new Compra();
+        compra.setClienteCedula(req.getClienteCedula());
+        compra.setFecha(Instant.now());
+        compraRepo.save(compra);
 
-    @Transactional
-    public void eliminar(UUID id) {
-        transRepo.deleteById(id);
+        // 3. Verificar fondos y preparar Transacción
+        boolean puede = cuenta.getSaldo() >= req.getMonto();
+        Transaccion tx = new Transaccion();
+        tx.setCompra(compra);
+        tx.setClienteCedula(req.getClienteCedula());
+        tx.setCuenta(cuenta);
+        tx.setMonto(req.getMonto());
+        tx.setFecha(Instant.now());
+        tx.setAprobada(puede);
+        transRepo.save(tx);
+
+        if (puede) {
+            // 4. Descontar saldo
+            cuenta.setSaldo(cuenta.getSaldo() - req.getMonto());
+            cuentaRepo.save(cuenta);
+            return new PurchaseResponse(true, "Compra aceptada", cuenta.getSaldo());
+        } else {
+            return new PurchaseResponse(false, "Saldo insuficiente", cuenta.getSaldo());
+        }
     }
 }
