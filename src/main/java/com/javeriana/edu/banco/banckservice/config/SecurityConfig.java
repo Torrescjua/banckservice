@@ -36,7 +36,7 @@ public class SecurityConfig {
           .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
           .authorizeHttpRequests(auth -> auth
               // 1) endpoints públicos de autenticación
-              .requestMatchers("/auth/**").permitAll()
+              .requestMatchers("/api/auth/**").permitAll()
 
               // 2) solo desde la IP autorizada podrá llamar a las transacciones
               .requestMatchers("/api/admin/transacciones/**")

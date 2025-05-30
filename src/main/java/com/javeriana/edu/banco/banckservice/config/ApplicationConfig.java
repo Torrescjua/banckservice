@@ -11,7 +11,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import com.javeriana.edu.banco.banckservice.repository.ClienteRepository;
+import com.javeriana.edu.banco.banckservice.repository.EmpleadoRepository;  
 
 import lombok.RequiredArgsConstructor;
 
@@ -19,27 +19,31 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ApplicationConfig {
 
-    private final ClienteRepository clienteRepository;
-    
+    private final EmpleadoRepository empleadoRepository; // ← INYECTA EmpleadoRepository
+
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception
-    {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
     @SuppressWarnings("deprecation")
     @Bean
     public AuthenticationProvider authenticationProvider(){
-        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-        authenticationProvider.setUserDetailsService(userDetailsService());
-        authenticationProvider.setPasswordEncoder(passwordEncoder());
-        return authenticationProvider;
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(userDetailsService());
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
     }
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return documento -> clienteRepository.findByNumeroDocumento(documento)
-            .orElseThrow(() -> new UsernameNotFoundException("No se encontró un cliente con número de documento: " + documento));
+        // Ahora busca en EmpleadoRepository en vez de ClienteRepository
+        return documento -> empleadoRepository.findByNumeroDocumento(documento)
+            .orElseThrow(() ->
+                new UsernameNotFoundException(
+                    "No se encontró un empleado con número de documento: " + documento
+                )
+            );
     }
 
     @Bean

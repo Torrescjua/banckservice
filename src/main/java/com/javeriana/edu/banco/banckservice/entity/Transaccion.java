@@ -31,5 +31,4 @@ public class Transaccion {
 
     private double monto;
     private Instant fecha;
-    // getters/setters
 }

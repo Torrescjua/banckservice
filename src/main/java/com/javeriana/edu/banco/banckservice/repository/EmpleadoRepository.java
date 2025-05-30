@@ -1,7 +1,9 @@
 package com.javeriana.edu.banco.banckservice.repository;
 
-import com.javeriana.edu.banco.banckservice.entity.Empleado;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
-import java.util.UUID;
+import com.javeriana.edu.banco.banckservice.entity.Empleado;
 
-public interface EmpleadoRepository extends JpaRepository<Empleado, UUID> {}
+public interface EmpleadoRepository extends JpaRepository<Empleado, Long> {
+    Optional<Empleado> findByNumeroDocumento(String numeroDocumento);
+}
