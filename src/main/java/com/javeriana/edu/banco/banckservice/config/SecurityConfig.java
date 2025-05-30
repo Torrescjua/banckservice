@@ -36,7 +36,7 @@ public class SecurityConfig {
           .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
           .authorizeHttpRequests(auth -> auth
               // 1) endpoints públicos de autenticación
-              .requestMatchers("/api/auth/**").permitAll()
+              .requestMatchers("/auth/**").permitAll()
 
               // 2) solo desde la IP autorizada podrá llamar a la ruta de Retail
               .requestMatchers("/api/retail/compras")
