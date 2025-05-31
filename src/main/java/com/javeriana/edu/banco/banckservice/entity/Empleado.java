@@ -31,9 +31,6 @@ public class Empleado implements UserDetails {
     @NotBlank(message = "Apellidos son obligatorios")
     private String apellidos;
 
-    @NotNull(message = "Fecha de nacimiento es obligatoria")
-    private String fechaNacimiento;
-
     @NotBlank(message = "Número de teléfono es obligatorio")
     private String numeroTelefono;
 

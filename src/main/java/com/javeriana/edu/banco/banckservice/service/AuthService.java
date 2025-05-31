@@ -37,7 +37,6 @@ public class AuthService {
             .numeroDocumento(req.getNumeroDocumento())
             .nombres(req.getNombres())
             .apellidos(req.getApellidos())
-            .fechaNacimiento(req.getFechaNacimiento())
             .numeroTelefono(req.getNumeroTelefono())
             .clave(passwordEncoder.encode(req.getClave()))
             .build();
