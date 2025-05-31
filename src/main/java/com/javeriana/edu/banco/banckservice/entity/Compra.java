@@ -18,7 +18,7 @@ public class Compra {
     @GeneratedValue
     private UUID id;
 
-    @Column(name = "cliente_cedula", unique = true)
+    @Column(name = "cliente_cedula", unique = false)
     private Integer clienteCedula;
 
     private Instant fecha;
