@@ -21,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
     private static final String RETAIL_APP_IP = "10.43.102.241";
+    private static final String CONCILIACION_APP_IP = "10.43.96.39";
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final AuthenticationProvider authProvider;
@@ -34,11 +35,16 @@ public class SecurityConfig {
             .authenticationProvider(authProvider)
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/").permitAll()
+                .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/api/retail/compras").access(new WebExpressionAuthorizationManager(
                     "hasIpAddress('" + RETAIL_APP_IP + "')"
                     + " or hasIpAddress('127.0.0.1')"
                     + " or hasIpAddress('::1')"
+                ))
+                .requestMatchers("/api/conciliacion/**").access(new WebExpressionAuthorizationManager(
+                    "hasIpAddress('" + CONCILIACION_APP_IP + "')"
+                + " or hasIpAddress('127.0.0.1')"
+                + " or hasIpAddress('::1')"
                 ))
                 .anyRequest().authenticated()
             )
