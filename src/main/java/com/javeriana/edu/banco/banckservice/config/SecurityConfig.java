@@ -20,7 +20,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private static final String RETAIL_APP_IP = "10.43.102.241";
+    private static final String RETAIL_APP_IP = "10.43.103.46";
     private static final String CONCILIACION_APP_IP = "10.43.96.39";
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
