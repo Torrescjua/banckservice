@@ -6,19 +6,17 @@ import org.springframework.core.Ordered;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.filter.ForwardedHeaderFilter;
 import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
+import org.springframework.security.config.http.SessionCreationPolicy;
 
 import com.javeriana.edu.banco.banckservice.jwt.JwtAuthenticationFilter;
 
 import lombok.RequiredArgsConstructor;
 
 @Configuration
-@EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -29,28 +27,22 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-          .csrf(csrf -> csrf.disable())
-          .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-          .authenticationProvider(authProvider)
-          .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-          .authorizeHttpRequests(auth -> auth
-              // 1) endpoints públicos de autenticación
-              .requestMatchers("/auth/**").permitAll()
-
-              // 2) solo desde la IP autorizada podrá llamar a la ruta de Retail
-              .requestMatchers("/api/retail/compras")
-                .access(new WebExpressionAuthorizationManager(
+        return http
+            .cors(cors -> {})
+            .csrf(csrf -> csrf.disable())
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authenticationProvider(authProvider)
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/auth/").permitAll()
+                .requestMatchers("/api/retail/compras").access(new WebExpressionAuthorizationManager(
                     "hasIpAddress('" + RETAIL_APP_IP + "')"
-                    + "or hasIpAddress('127.0.0.1') "
-                    + "or hasIpAddress('::1')"
+                    + " or hasIpAddress('127.0.0.1')"
+                    + " or hasIpAddress('::1')"
                 ))
-
-              // 3) el resto requieren autenticación JWT
-              .anyRequest().authenticated()
-          );
-
-        return http.build();
+                .anyRequest().authenticated()
+            )
+            .build();
     }
 
     @Bean

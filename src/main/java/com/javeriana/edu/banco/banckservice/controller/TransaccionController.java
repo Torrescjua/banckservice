@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 public class TransaccionController {
 
     private final TransaccionService transaccionService;
-    private static final String RETAIL_APP_IP = "10.43.102.241";
+    private static final String RETAIL_APP_IP = "10.43.103.46";
 
     public TransaccionController(TransaccionService transaccionService) {
         this.transaccionService = transaccionService;
