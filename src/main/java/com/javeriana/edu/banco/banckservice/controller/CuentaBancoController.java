@@ -1,7 +1,9 @@
 package com.javeriana.edu.banco.banckservice.controller;
 
 import com.javeriana.edu.banco.banckservice.entity.CuentaBanco;
+import com.javeriana.edu.banco.banckservice.entity.Transaccion;
 import com.javeriana.edu.banco.banckservice.repository.CuentaBancoRepository;
+import com.javeriana.edu.banco.banckservice.repository.TransaccionRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,9 +15,11 @@ import java.util.UUID;
 public class CuentaBancoController {
 
     private final CuentaBancoRepository cuentaRepo;
+    private final TransaccionRepository transaccionRepo;
 
-    public CuentaBancoController(CuentaBancoRepository cuentaRepo) {
+    public CuentaBancoController(CuentaBancoRepository cuentaRepo, TransaccionRepository transaccionRepo) {
         this.cuentaRepo = cuentaRepo;
+        this.transaccionRepo = transaccionRepo;
     }
 
     // Crear cuenta
@@ -59,5 +63,15 @@ public class CuentaBancoController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    // Obtener transacciones de una cuenta por ID de cuenta
+    @GetMapping("/{id}/transacciones")
+    public ResponseEntity<List<Transaccion>> obtenerTransaccionesPorCuenta(@PathVariable UUID id) {
+        if (!cuentaRepo.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        List<Transaccion> transacciones = transaccionRepo.findByCuentaId(id);
+        return ResponseEntity.ok(transacciones);
     }
 }
