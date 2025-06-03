@@ -5,10 +5,8 @@ services:
     image: mysql:8.0
     container_name: mysql-db
     environment:
-      MYSQL_ROOT_PASSWORD: 1001299208Ju
+      MYSQL_ROOT_PASSWORD: 1001299208Ju       # ← usa un secreto real en prod
       MYSQL_DATABASE: bank
-    ports:
-      - "3307:3306"
     volumes:
       - db_data:/var/lib/mysql
     healthcheck:
@@ -18,9 +16,7 @@ services:
       retries: 5
 
   banckservice:
-    build:
-      context: ./banckservice
-      dockerfile: Dockerfile      # Asegúrate de que dentro de banckservice tengas un Dockerfile para Spring Boot
+    build: .                                  # o reemplaza por image: tu_usuario/banckservice:latest
     container_name: banckservice
     depends_on:
       mysql-db:
@@ -30,25 +26,9 @@ services:
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: 1001299208Ju
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.MySQLDialect
       SPRING_JPA_SHOW_SQL: "true"
     ports:
-      - "8081:8080"
-
-  frontend:
-    container_name: frontend-dev
-    build:
-      context: ./ProyectoFrontArqui
-      dockerfile: Dockerfile.dev   # Dentro de ProyectoFrontArqui debes tener un Dockerfile.dev tal como explicamos
-    volumes:
-      - ./ProyectoFrontArqui:/app
-      - /app/node_modules
-    ports:
-      - "5173:5173"
-    environment:
-      VITE_API_URL: http://localhost:8081
-    depends_on:
-      - banckservice
-
+      - "8081:8080"                           # REST + WS en el mismo puerto
+    restart: always                           # arráncalo con la VM
 volumes:
   db_data:
