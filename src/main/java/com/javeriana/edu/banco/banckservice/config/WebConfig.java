@@ -14,7 +14,7 @@ public class WebConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173")); // Cambia si tu front está en otro puerto
+        configuration.setAllowedOrigins(List.of("http://10.101.136.49:5173")); // Cambia si tu front está en otro puerto
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
